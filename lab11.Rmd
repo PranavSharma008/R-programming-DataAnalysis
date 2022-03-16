@@ -1,0 +1,133 @@
+
+# Intro to Data Science - lab 11
+
+##### Copyright 2021, Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here: Pranav Sharma
+```
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+```
+1.Read in the following data set with read_csv():
+https://intro-datascience.s3.us-east-2.amazonaws.com/ClimatePosts.csv
+
+The name of the file is “ClimatePosts.csv”. Store the data in a data frame called tweetDF. Use str(tweetDF) to summarize the data. Add a comment describing what you see. Make sure to explain what each of the three variables contains.
+```{r}
+library(tidyverse)
+tweetDF <- read_csv('https://intro-datascience.s3.us-east-2.amazonaws.com/ClimatePosts.csv')
+str(tweetDF)
+#install.packages("quanteda")
+library(quanteda)
+View(tweetDF)
+# We see 3 columns when we do the STR command. The 3 columns are ID(chr), Skeptic(num), Tweet(chr) and we some of the starting values of each column based on the maximum text length that can be displayed. 
+# IDs are the unique documents names of the Tweets. Skeptic consists of only a 0 and 1 value and it depicts a boolean information like whether the tweets are skeptic or not!. Tweets consists of the actual text present in a tweet in accordance with the IDs.
+```
+
+
+2.Use the corpus commands to turn the text variable into a quanteda corpus. You can use the IDs as the document titles with the following command:
+
+```{r}
+library(quanteda.textmodels)
+tweetCorpus <- corpus(tweetDF$Tweet, docnames=tweetDF$ID)
+```
+3.Next, convert the corpus into a document-feature matrix (DFM).  Before you do that you can use “tokens” to remove punctuation and stop words. Use this code:
+toks <- tokens(tweetCorpus, remove_punct=TRUE)
+toks_nostop <- tokens_select(toks, pattern = stopwords("en"), selection = "remove")
+
+Here’s a command that will create the DFM:
+tweetDFM <- dfm(toks_nostop, tolower = TRUE )                          
+```{r}
+# tokenized the corpus.
+toks <- tokens(tweetCorpus, remove_punct=TRUE)
+# removal of the stop words
+toks_nostop <- tokens_select(toks, pattern = stopwords("en"), selection = "remove")
+# conversion into a DFM
+tweetDFM <- dfm(toks_nostop, tolower = TRUE ) 
+```
+4.Type tweetDFM at the console to find out the basic characteristic of the DFM (the number of terms, the number of documents, and the sparsity of the matrix). Write a comment describing what you observe.
+```{r}
+tweetDFM
+# It has 18 documents, 223 features. The Sparsity of the matrix is 93.20 %. We can see 10 term here from breaking .. to .. reliably. I further observe 1 and 0 values in front of the terms. I think it depicts the number of times the word appeared in the DOC. Like breaking came one time in the DOC climatechange. 
+```
+5.Create a wordcloud from the DFM using the following command. Write a comment describing notable features of the wordcloud:
+textplot_wordcloud(tweetDFM, min_count = 1)
+```{r}
+#install.packages("quanteda.textplots")
+library(quanteda.textplots)
+textplot_wordcloud(tweetDFM, min_count = 1)
+# The most notable features are the word size which is directly proportional to the frequency of the occurrence of the word in the tweets. Through this we can also judge the basic meaning or context of the tweets. For example in the below word cloud we can see that the theme is of climate. 
+```
+6.Using textstat_frequency() from the quanteda.textstats package, show the 10 most frequent words, and how many times each was used/mentioned.
+```{r}
+#install.packages("quanteda.textstats")
+library(quanteda.textstats)
+textstat_frequency(tweetDFM,min(10))
+```
+
+7.Next, we will read in dictionaries of positive and negative words to see what we can match up to the text in our DFM. Here’s a line of code for reading in the list of positive words:
+
+URL <- "https://intro-datascience.s3.us-east-2.amazonaws.com/positive-words.txt"
+posWords <- scan(URL, character(0), sep = "\n")
+posWords <- posWords[-1:-34]
+
+Create a similar line of code to read in the negative words, with the following URL: https://intro-datascience.s3.us-east-2.amazonaws.com/negative-words.txt
+
+There should be 2006 positive words and 4783 negative words.
+```{r}
+URL <- "https://intro-datascience.s3.us-east-2.amazonaws.com/positive-words.txt"
+posWords <- scan(URL, character(0), sep = "\n")
+posWords <- posWords[-1:-34]
+
+URL_negative <- "https://intro-datascience.s3.us-east-2.amazonaws.com/negative-words.txt"
+negWords <- scan(URL_negative, character(0), sep = "\n")
+# negative words
+negWords <- negWords[-1:-34]
+```
+
+```{r}
+length(posWords)
+length(negWords)
+```
+
+8.Explain what the following lines of code does and comment each line. Then add similar code for the negative words.
+
+```{r}
+# matching positive words to your dfm
+posDFM <- dfm_match(tweetDFM, posWords) 
+# display the frequency of your positive words
+posFreq <- textstat_frequency(posDFM)
+
+# matching negative words to your dfm
+negDFM <- dfm_match(tweetDFM, negWords) 
+# display the frequency of your negative words
+negFreq <- textstat_frequency(negDFM)
+```
+9.Explore posFreq and negFreq using str() or glimpse(). Explain the fields in these data frames.
+```{r}
+str(posFreq)
+# The STR as usual shows the columns present in the database along with some of the starting values of the column. The columns are features which contains a list of positive words for the posFreq and it contains a list of negative words for negFreq which are present in the tweetDFM. 
+View(posFreq)
+glimpse(negFreq)
+# glimse shows us but in a prettier way . It shows us that for the particular negFreq we have 5 columns and 17 rows. 17 rows meaning , we found 17 unique negative words in the TWEETs. 
+View(negFreq)
+# frequency :-  it is the frequency of the particular word in that TWEET
+# rank:- depending on the frequency the words are ranked which the highest rank to the word with the highest frequency
+#docFrequency:- the frequency of the word in a document
+# group:- all have been grouped
+```
+10. Output the 10 most frequently occurring positive and negative words
+including how often each occurred.
+```{r}
+# we are showing the 10 most frequent words with all the columns
+# Positive Words
+posFreq[1:10,]
+# Negative Words
+negFreq[1:10,]
+```
+

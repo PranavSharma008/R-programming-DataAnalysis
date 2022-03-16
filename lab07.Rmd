@@ -1,0 +1,131 @@
+# Intro to Data Science - HW 5
+
+##### Copyright 2021, Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here:Pranav Sharma
+```
+
+### Attribution statement: (choose only one and delete the rest)
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+#install.packages("maps")
+##install.packages("mapproj")
+#install.packages("ggmap")
+library(maps)
+library(mapproj)
+library(ggmap)
+#install.packages("ggplot2")
+library(ggplot2)
+```
+us <- map_data("state")
+us$state_name <- tolower(us$region)
+
+map <- ggplot(us, aes(map_id= state_name))
+map <- map + aes(x=long, y=lat, group=group) + 
+             geom_polygon(fill = "white", color = "black") 
+map <- map + expand_limits(x=us$long, y=us$lat)
+map <- map + coord_map() + ggtitle("USA Map")
+map
+
+1.Add a comment for each line of code, explaining what that line of code does.
+```{r}
+?map_data
+# here map_data easily turns data from the maps package in to a dataframe suitable for plotting with ggplot2
+us <- map_data("state")
+#defining a new column or putting in the existing column value of region column of US.
+us$state_name <- tolower(us$region)
+# defining map plot with ggplot of us with aesthetics map_id
+map <- ggplot(us, aes(map_id= state_name))
+# adding conditions to your ggplot with aes(), x-axis-> longitude,y->latitude,group->group plus adding polygon plot with ggplot with function geom_polygon
+map <- map + aes(x=long, y=lat, group=group) + 
+             geom_polygon(fill = "white", color = "black") 
+# Now we are Inputing the latitudes and longitudes of US
+
+# the expand limits function expands the plot limits and the us$long and us$lat are the limiters set through x and y axis.
+map <- map + expand_limits(x=us$long, y=us$lat)
+
+# adding coord_map() projects the earth onto a 2d flat plane. With GGtitle you should be able to see the title on the map plot.
+map <- map + coord_map() + ggtitle("USA Map")
+map
+View(us)
+```
+2.The map you just created fills in the area of each state in white while outlining it with a thin black line. Use the fill= and color= commands inside the call to geom_polygon( ) to reverse the color scheme
+```{r}
+map4 <- map + geom_polygon(fill="black",color="white")
+map4
+```
+
+Now run the following code:
+ny_counties <- map_data("county","new york")
+
+ggplot(ny_counties) + aes(long,lat, group=group) + geom_polygon(fill = "white", color = "black")
+```{r}
+ny_counties <- map_data("county","new york")
+
+ny_counties3<- ggplot(ny_counties) + aes(long,lat, group=group) + geom_polygon(fill = "white", color = "black")
+ny_counties3
+```
+3.Just as in step 2, the map you just created fills in the area of each county in black while outlining it with a thin white lines. Use the fill= and color= commands inside the call to geom_polygon( ) to reverse the color scheme.
+```{r}
+ny_counties_3 = ny_counties3 + geom_polygon(fill="black",color="white" )
+ny_counties_3
+View(pop)
+```
+4.Run head(ny_counties) to verify how the county outline data looks.
+```{r}
+head(ny_counties)
+```
+5.Make a copy of your code from step 3 and add the following subcommand to your ggplot( ) call (don’t forget to put a plus sign after the geom_polygon( ) statement to tell R that you are continuing to build the command):
+coord_map(projection = "mercator")
+In what way is the map different from the previous map. Be prepared to explain what a Mercator projection is. 
+```{r}
+# size gets smaller and focussed and cylindrical form. the ratio of latitude to longitude varies across the globe. Near equator the ratio is almost 1 but near the poles it tends towards infinity because length of 1 degree of longitude tends towards 0. For regions that span only a few degrees and are not too close to the poles, setting the aspect raio of plot to an approximate ratio of latitude/longitude is the mercator projection.
+ny_counties_3 + coord_map(projection = "mercator")
+
+```
+
+6.Grab a copy of the nyData.csv data set from: 
+https://intro-datascience.s3.us-east-2.amazonaws.com/nyData.csv
+Read that data set into R with read_csv(). This will require you have installed and libraried the readr package. The next step assumes that you have named the resulting data frame “nyData.
+```{r}
+#install.packages("tidyverse")
+library(
+  readr
+)
+nyData <-  read_csv('https://intro-datascience.s3.us-east-2.amazonaws.com/nyData.csv')
+```  
+
+
+7.Next, merge your ny_counties data from the first set of 
+questions with your new nyData data frame, with this code:
+ mergeNY <- merge(ny_counties,nyData,
+                 all.x=TRUE,by.x="subregion",by.y="county")
+```{r}
+View(ny_counties)
+View(nyData)
+mergeNY <- merge(ny_counties,nyData,all.x=TRUE,by.x="subregion",by.y="county")
+```
+8.Run head(mergeNY) to verify how the merged data looks.
+```{r}
+head(mergeNY)
+```
+9.Now drive the fill color inside each county by adding the fill aesthetic inside of your geom_polygon( ) subcommand (fill based on the pop2000).
+```{r}
+ggplot(mergeNY) + aes(long,lat, group=group) + geom_polygon(aes(fill=pop2000),color="black") + coord_map(projection = "mercator")
+```
+10. Extra (not required):
+a.	Read in the following JSON datasets:
+'https://gbfs.citibikenyc.com/gbfs/en/station_information.json'
+'https://gbfs.citibikenyc.com/gbfs/en/station_status.json'
+b.	Merge the datasets, based on ‘station_id’
+c.	Clean the merged dataset to only include useful information
+For this work, you only need lat, lon and the number of bikes available
+d.	Create a stamen map using ‘get_stamenmap()’
+Have the limits of the map be defined by the lat and lot of the stations
+e.	Show the stations, as points on the map.
+f.	Show the number of bikes available as a color
+```{r}
+
+```

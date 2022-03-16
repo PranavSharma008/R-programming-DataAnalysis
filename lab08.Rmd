@@ -1,0 +1,93 @@
+# Intro to Data Science -Lab 08
+
+##### Copyright 2021, Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here:Pranav Sharma
+```
+
+### Attribution statement: (choose only one and delete the rest)
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+#install.packages("maps")
+##install.packages("mapproj")
+#install.packages("ggmap")
+library(maps)
+library(mapproj)
+library(ggmap)
+library(MASS)
+#install.packages("ggplot2")
+#install.packages("ggplot2")
+library(ggplot2)
+```
+
+1. Explore	this	dataset	descrption	by	doing	?Boston	at	the	command	promt
+```{r}
+Boston<- Boston
+ggplot(data=Boston) + aes(x=rm, y=medv) + geom_point() + geom_smooth(method="lm", se=FALSE)
+```
+2. The	graphic	you	just	created	fits	a	best	line	to	a	cloud	of	points.	Copy	and	modify
+the	code	to	produce	a	plot	where	“crim”	is	the	x	variable	instead	of	“rm.”
+```{r}
+plot1 <- ggplot(data=Boston) + aes(x=crim, y=medv) + geom_point() +
+ geom_smooth(method="lm", se=FALSE)
+plot1
+```
+3. Produce	a	histogram	and	descriptive	statistics	for	Boston$crim.	Write	a
+comment	describing	any	anomalies	or	oddities.
+```{r}
+ggplot(data=Boston,aes(crim)) +geom_histogram(bins=20)
+#hist(Boston$crim)
+```
+4. Produce	a	linear	model,	using	the	lm( )	function	where	crim predicts	medv.
+Remember	that	in	R’s	formula	language,	the	outcome	variable	comes	first	and	is
+separated	from	the	predictors	by	a	tilde,	like	this:	medv ~ crim
+Try	to	get	in	the	habit	of	storing	the	output	object	that	is	produced	by	lm	and
+other	analysis	procedures.	For	example,	I	often	use	lmOut <- lm( . . .
+```{r}
+lmOut <- lm(medv~crim ,data = Boston)
+summary(lmOut)
+```
+5. Run	a	multiple	regression	where	you	use	rm, crim,	and	dis	(distance	to
+Boston	employment	centers).	You will use	all	three	predictors	in	one	model	with
+this formula:		medv ~ crim + rm + dis. Now run three separate models
+for each independent variable separate.
+```{r}
+lmReg <- lm(medv ~ crim + rm + dis, data=Boston)
+
+# 
+lmReg2<- lm(medv ~ crim,data=Boston)
+lmReg3<-lm(medv ~ rm,data=Boston) 
+lmReg4<- lm(medv ~ dis,data=Boston)
+
+```
+6. Interpret	the	results	of	your	analysis	in	a	comment.	Make	sure	to	mention	the	pvalue,	the	adjusted	R-squared,	the	list	of	significant	predictors	and	the	coefficient
+for	each	significant	predictor.
+```{r}
+summary(lmReg)
+#adjusting R2 rate is 0.5399,pvalue is < 2.2e-16. 
+#Significant Predictors (Intercept)=> 2e-16,crim=> 2.32e-12,rm=> 2e-16 ; Coefficient ->  Pr(>|t|)
+summary(lmReg2)
+#adjusting R2 rate is 0.1491,pvalue is < 2.2e-16
+#Significant Predictors crim=> 2.2e-16,(Intercept)=> 2e-16; Coefficient->  Pr(>|t|)
+summary(lmReg3)
+#adjusting R2 rate is 0.4825,pvalue is < 2e-16. 
+#Significant Predictors (Intercept)=> 2e-16,rm=> 2e-16;  Coefficient->  Pr(>|t|)
+summary(lmReg4)
+#adjusting R2 rate is 0.0606,pvalue is 1.207e-08. 
+#Significant Predictors (Intercept) => 2e-16, dis=> 1.21e-08;Coefficient->  Pr(>|t|)
+```
+7. Create	a	one-row	data	frame	that	contains	some	plausible	values	for	the
+predictors.	For	example,	this	data	frame	contains	the	median	values	for	each
+predictor: predDF <- data.frame(crim = 0.26, dis=3.2, rm=6.2) The
+numbers used here were selected randomly by looking at min and max data of the
+variables.
+```{r}
+predDF <- data.frame(crim = 0.3, dis=3.3, rm=6.1)
+```
+8. Use	the	predict( ) command	to	predict	a	new	value	of	medv	from	the	onerow	data	frame.	If	you	stored	the	output	of	your	lm	model	in	lmOut,	the
+command	would	look	like	this:	predict(lmOut, predDF)
+```{r}
+predict(lmOut,predDF)
+```

@@ -1,0 +1,127 @@
+# Intro to Data Science - HW 5
+
+##### Copyright 2021, Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here:Pranav Sharma
+```
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+```
+
+Reminders of things to practice from previous weeks: <br>
+Descriptive statistics: 	mean( ) max( ) min( )<br>
+Coerce to numeric:		as.numeric( )<br>
+
+## Part 1: Use the Starter Code 
+
+Below, I have provided a starter file to help you. <br>
+
+Each of these lines of code **must be commented** (the comment must that explains what is going on, so that I know you understand the code and results).
+
+
+```{r}
+#install.packages("RCurl")
+#install.packages("jsonlite")
+
+# with the library function, we are able to make use the packages we installed earlier
+library(RCurl)
+library(jsonlite)
+# the data in the url gets stored into the dataset. The URL is of an JSON File
+dataset <- getURL("https://intro-datascience.s3.us-east-2.amazonaws.com/role.json")
+# storing the JSON data in readlines and converting it from the JSON file to R objects
+readlines <- jsonlite::fromJSON(dataset)
+# now because readlines is a R object, we can traverse it thus df is a dataframe which contains columns in person. THe heirarchy goes as readlines -->object-->person. Readlines contains objects and objects consists of person
+df <- readlines$objects$person
+```
+
+A.	Explore the **df** dataframe (e.g., using head() or whatever you think is best).
+
+
+```{r}
+#summary(df)
+View(df)
+head(df)
+```
+
+B.	Explain the dataset <br>
+o	What is the dataset about? <br>
+o	How many rows are there and what does a row represent?<br>
+o	How many columns and what does each column represent?<br>
+
+
+
+```{r}
+# (1) df Dataset is dataset is data about many different people.
+# (2) There are 100 rows,which means there are maximum 100 distinct people's data present with us. By changing the row. Every row represents one person, one individual.
+# (3) There are 17 columns which gives us actual information, column names are metadata which guide us in telling information about a particular row or if traversing a whole column together
+```
+
+## Part 2: Investigate the resulting dataframe 
+
+C.	How many senators are women? 
+
+
+```{r}
+# making a new DF where every person is a woman
+df_womenOnly <- df[df$gender=='female',]
+# calculates the number of women in the DF
+nrow(df_womenOnly)
+```
+
+D.	How many senators have a YouTube account?  
+
+
+```{r}
+# number of total columns minus people not having a youtube account
+nrow(df)-nrow(df[df$youtubeid == '',])
+```
+
+E.	How many women senators have a YouTube account?
+
+
+```{r}
+# same operation as in the previous question. Here I am just using df_women_only which is a dataframe with only women entries
+nrow(df_womenOnly)-nrow(df_womenOnly[df_womenOnly$youtubeid=='',])
+```
+
+F.	Create a new dataframe called **youtubeWomen** that only includes women senators who have a YouTube account.   
+
+
+```{r}
+# a different way to proceed used than the previous approach. is.na returns a logical output. We wanted to weed out the rows where youtube id was empty.
+youtubeWomen <- df_womenOnly[is.na(df_womenOnly$youtubeid)==FALSE,]
+youtubeWomen
+```
+
+G.	What does running this line of code do? Explain in a comment: 
+
+
+```{r}
+# it gives is a substring of values from the 1st to 4th indexing. Every data of birthdate of women starts with year. So we are just cutting out the year part of the birthdate and storing it in a different column
+youtubeWomen$year <- substr(youtubeWomen$birthday,1,4)
+#youtubeWomen$year
+```
+
+H.	Use this new variable to calculate the mean **birthyear** in **youtubeWomen**. <br>
+**Hint:** You may need to convert it to numeric first.
+
+
+```{r}
+#created a new column as required with years as a numeric value
+youtubeWomen$birthyear <- as.numeric(youtubeWomen$year)
+mean(as.numeric(youtubeWomen$year))
+```
+
+I.	Make a histogram of the **birthyears** of senators in **youtubeWomen**. Add a comment describing the shape of the distribution.
+
+
+```{r}
+hist(as.numeric(youtubeWomen$year))
+#shape of the distribution is maximum in the between and low at the start and the end. It kinda seems like a normal distribution which is formed after sampling and taking means of means. But it is not a normal distribution
+```

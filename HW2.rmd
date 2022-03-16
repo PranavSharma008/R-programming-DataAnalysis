@@ -1,0 +1,149 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Intro to Dat Science - HW 2
+##### Copyright  Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+# IST687 Section M002
+
+# Professor Anderson
+
+```{r}
+# Enter your name here: Pranav Sharma
+```
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+```
+
+### Reminders of things to practice from last week: 
+Assignment arrow  		<- <br>
+The combine command 	c( ) <br>
+Descriptive statistics 	mean( ) sum( ) max( ) <br>
+Arithmetic operators		+ - * /<br>
+Boolean operators		>    <    >=    <=   ==   !=  <br>
+
+**This Week:** Explore the **quakes** dataset (which is included in R). Copy the **quakes** dataset into a new dataframe (call it **myQuakes**), so that if you need to start over, you can do so easily (by copying quakes into myQuakes again). Summarize the variables in **myQuakes**. Also explore the structure of the dataframe
+
+
+
+```{r}
+myQuakes <- quakes
+summary(myQuakes)
+```
+
+**Step 1:** Explore the earthquake magnitude variable called **mag**  <br>
+
+A.	What is the average magnitude? Use mean() or summary():
+
+
+```{r}
+# mag is a column inside the dataframe myQuakes. We use the $ sign to call the columns. It matches what we got in summary in the last question.
+mag<-mean(myQuakes$mag) 
+mag
+```
+
+B.	What is the magnitude of the largest earthquake? Use max() or summary() and save the result in a variable called **maxQuake**:
+
+
+```{r}
+#using the max function to directly get the value instead of summary
+maxQuake<- max(myQuakes$mag)
+maxQuake
+```
+
+C.	What is the magnitude of the smallest earthquake? Use min() or summary() and save the result in a variable called **minQuake**:
+
+
+```{r}
+#using the min function to directly get the value instead of summary
+minQuake <- min(myQuakes$mag)
+minQuake
+```
+
+D.	Output the **third row** of the dataframe
+
+
+```{r}
+# by writing [3,] we are calling the third row and the blank value signifies calling every column
+myQuakes[3,]
+```
+
+E. Create a new dataframe, with only the rows where the **magnitude is greater than 4**. How many rows are in that dataframe (use code, do not count by looking at the output) 
+
+
+```{r}
+#newMyquakes represents a dataframe with putting a condition on values of rows in column mag such that if a column value is not greater than 4, those rows are not included.
+newMyQuakes <- myQuakes[myQuakes$mag>4,]
+
+#nrow function is used to calculate number of rows in any dataframe
+nrow(newMyQuakes)
+```
+
+F.	Create a **sorted dataframe** based on magnitude and store it in **quakeSorted1**. Do the sort two different ways, once with arrange() and then with order()
+
+```{r}
+#used the mag column to sort as mentioned in the question 
+quakeSorted1 <- sort(myQuakes$mag) 
+# had to install tidyverse and use the library function to use arrange.
+library(tidyverse)
+quakeSorted1 <- myQuakes %>% arrange(myQuakes,mag)
+#install.packages("tidyverse")
+
+``` 
+
+G.	What are the latitude and longitude of the quake reported by the largest number of stations?  
+
+
+```{r}
+myNewDataframe <- myQuakes[which.max(myQuakes$stations),]
+# creating a separate vector for latitude and longitude to show their values
+latitude <- myNewDataframe$lat
+longitude<- myNewDataframe$long
+
+latitude 
+longitude
+
+# we can combine them by c() function and then save them into new vector
+lat_long_max <-c(latitude,longitude)
+lat_long_max
+```
+
+H.	What are the latitude and longitude of the quake reported by the smallest number of stations?  
+
+
+```{r}
+#Filtering values based on condition that number of stations is the minimum
+myNewDataframe <- myQuakes[which.min(myQuakes$stations),]
+# this time we represented the output in the form of data frame.
+lat_long_min_stations <- data.frame(myNewDataframe$lat,myNewDataframe$long)
+lat_long_min_stations
+```
+
+**Step 3:** Using conditional if statements <br>
+
+I.	 Test if **maxQuake** is greater than 7 (output “yes” or “no”) <br>
+**Hint:** Try modifying the following code in R: 
+
+
+```{r}
+if(maxQuake>7){
+  print ("Yes")
+}else
+  print("No")
+#if  (100 < 150) "100 is less than 150" else "100 is greater than 150"
+```
+
+J.	 Following the same logic, test if **minQuake** is less than 3 (output “yes” or “no”):
+
+
+```{r}
+if(minQuake<3){
+  print ("Yes")
+}else
+  print("No")
+```

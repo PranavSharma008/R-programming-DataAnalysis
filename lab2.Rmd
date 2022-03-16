@@ -1,0 +1,140 @@
+## Intro to Data Science - Lab 1
+
+# IST687 Section M002
+
+# Professor Anderson
+
+# Enter your name here: Pranav Sharma
+
+#Select one of the below and add needed information
+
+# 1. I did this homework by myself, with help from the book and the professor.
+
+#1. Make	a	copy	of	the	built-in	iris	data	set	like	this: myIris	<- iris
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+myIris <- iris
+```
+#2. Get	an	explanation	of	the	contents	of	the	data	set	with	the	help	function: help("iris")
+```{r}
+help("iris")
+```
+#3. Explore	myIris	via	str	and	the	glimpse	functions	(note:	you	need	to	install	and	library	‘tidyverse’	to	use	glimpse).	Which	do	you	think	is	better?	Why?
+```{r}
+##Commenting to knit the document without any error. Output is mentioned below
+str(myIris)
+glimpse(myIris)
+#i think str is better because it provides more information like datatype which glimpse doesn't
+```
+
+#4. Summarize	the	variables	in	your	copy	of	the	data	set,	like	this:
+```{r}
+summary(myIris)
+```
+#5. The	summary()	command	provided	the	mean	of	each	numeric	variable.	Choose	the	variable	with	the	highest	mean and	list	its	contents	to	the	console.	Any	variable	can	be	echoed	to	the	console	simply	by	typing	its	name.	Here’s	an	example	that	echoes	the	variable with	the	lowest	mean to	the	console:myIris$Petal.Width
+
+```{r}
+myIris$Sepal.Length
+```
+
+#6. Now	sort	that attribute by	calling	the	sort()	function and	supplying	that	variable.	Remember	to	choose	the	variable	with	the	highest	mean.	
+```{r}
+sort(myIris$Sepal.Length)
+```
+#7. Now	repeat	the	previous	command,	but	this	time	use	the	order()	function,	again	using	the	variable	with	the	highest	mean.	
+```{r}
+order(myIris$Sepal.Length)
+```
+#8. Write	a	comment	in	your	R	code	explaining	the	difference	between	sort()	and	order().	Be	prepared	to	explain	this	difference	to	the	class.
+```{r}
+#sort code does an ascending and descending sort and just returns the vector sorted. Order function returns the index of the sorted from the database.
+```
+
+#9. Now	use	the	order	command	to	reorder	the	whole	data	frame,	store	the	new	dataframe	in	a	variable	called	‘sortedDF’ 
+```{r}
+# took reference from stack overflow since order function gave error.
+##commenting to not get error while knitting document
+#install.packages("wrapr")
+library(wrapr)
+sortedDF <- orderv(myIris)
+sortedDF
+```
+#10. Now	sort	the	dataframe	using	arrange(),	which	is	part	of	the	tidyverse	package.	This	time,	sort	based the	attribute with	the	lowest mean.	Store	the	new	dataframe	in	a	variable	called	‘sortedDF1’
+```{r}
+#arrange(Petal.Width) use this and not sort
+sortedDF1 <- myIris %>% arrange(Petal.Width)
+#sortedDF1 <- sort(myIris$Petal.Width)
+sortedDF1
+```
+#11. Finally,	use	View()	to	examine	your	reordered	data	frames and	be	prepared	to	report	on	the	first	few	rows
+```{r}
+View(sortedDF)
+View(sortedDF1)
+```
+
+#12. What	does	the	following	line	of	code	do? myIris [	,	1]
+```{r}
+table(myIris[,1])
+#shows all the rows with column 1
+```
+#13. What	is	the	difference	(if	any)	between	myIris [	,	"Sepal.Length"] myIris $Sepal.Length
+```{r}
+View(myIris [	,	"Sepal.Length"])
+View(myIris $Sepal.Length)
+# difference is between how they are called. The former is called using tinyverse while the other is called using R libs. There is not difference in the output.
+```
+#14. Write	the	R	code	that	outputs	the	‘Sepal.Length’	attribute	values,	using	the	select()	command.
+```{r}
+#myIris$Sepal.Length
+select (myIris,Sepal.Length)
+```
+#15. Create	a	new	column (called	‘Ave.Length’) in	myIris,	which,	for	each	row,	is	the	average	of	Sepal.Length	and	Petal.Length.	
+```{r}
+myIris$Ave.length = mean(myIris$Sepal.Length + myIris$Petal.Length)
+myIris$Ave.length
+``` 
+#16. What	does	the	following	line	of	code	do: which.min(myIris$Petal.Length)
+```{r}
+which.min(myIris$Petal.Length)
+# Determines the index location of the first minimum value of column Petal.Length in myIris
+```
+#17. Using	the	code	from	the	previous	step,	output	the	row	(iris	observation)	with	the	smallest	petal	length.
+```{r}
+summary(myIris)
+myIris[,min(myIris$Petal.Length)]
+
+```
+# 18. Create	a	new	dataframe,	with	just	the	Petal.Length	and	Petal.Width	attributes 
+```{r}
+newDataFrame <- data.frame(myIris$Petal.Length,myIris$Petal.Width)
+newDataFrame
+```
+# 19. Create	a	new	dataframe,	using	the	slice()	function,	with	only	the	first	three	rows in	the	myIris	dataframe.
+```{r}
+smallDF<- myIris %>% slice(1:3)
+smallDF
+```
+
+#  20. Create	a	new	dataframe,	which	is	a	subset	of	myIris,	that	only	includes rows	where	Petal.Length is	less	than	1.4,	store	in	shortPetalDF 
+```{r}
+shortPetalDF<- myIris[myIris$Petal.Length<1.4,]
+#OR
+shortPetalDF<- myIris %>% filter(myIris$Petal.Length<1.4)
+shortPetalDF
+```
+
+#21. How	many	rows	are	in	the	shortPetalDF?
+```{r}
+nrow(shortPetalDF)
+```
+# 22. The	homework	asks	you	to	create	a	conditional	statement	with	if and	else.	A	conditional statement	is	part	of	a	larger	group	of	specialized	commands	that control	the	“flow”	of	a	program	– what	command	gets	run	and	when.	You	can	get	help	on	if,	else,	and	other	control	words.
+# help("if")
+#help("Control")
+#Now	add	and	run	your	first	conditional	statement:
+```{r}
+myNumbers <- c(1:10)
+if(sum (myNumbers) >40 ) print("the sum is greater than 40") else {print("it is not greater than 40")
+  }
+```

@@ -1,0 +1,217 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# Intro to Data Science - HW 7
+##### Copyright Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here: Pranav Sharma
+```
+
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+
+# 1. I did this homework by myself, with help from the book and the professor.
+
+```
+
+Last assignment we explored **data visualization** in R using the **ggplot2** package. This homework continues to use ggplot, but this time, with maps.  In addition, we will merge datasets using the built-in **merge( )** function, which provides a similar capability to a **JOIN in SQL** (don't worry if you do not know SQL). Many analytical strategies require joining data from different sources based on a **“key”** – a field that two datasets have in common. 
+
+## Step 1: Load the population data
+
+A.	Read the following JSON file, https://intro-datascience.s3.us-east-2.amazonaws.com/cities.json and store it in a variable called **pop**.
+
+Examine the resulting pop dataframe and add comments explaining what each column contains.
+
+
+
+```{r}
+#install.packages("RCurl")
+#install.packages("jsonlite")
+library(RCurl)
+library(jsonlite)
+pop <- fromJSON('https://intro-datascience.s3.us-east-2.amazonaws.com/cities.json')
+#View(pop)
+summary(pop)
+# city column contains all the city names
+# Growth column contains the growth percentage from year 2000 to 2013. 
+# latitude and longitude represents coordinates from the cities
+# population represents population of the different cities
+# Rank signifies city's rank with respect to other. The criteria through which they are ranked is still unclear, state contains the state value in which those city are present
+```
+
+B.	Calculate the **average population** in the dataframe. Why is using mean() directly not working? Find a way to correct the data type of this variable so you can calculate the average (and then calculate the average)
+
+Hint: use **str(pop)** or **glimpse(pop)** to help understand the dataframe
+
+
+```{r}
+str(pop)
+mean(as.numeric(pop$population),na.rm=TRUE)
+
+```
+
+C.	What is the population of the smallest city in the dataframe? Which state is it in?
+
+
+```{r}
+#declaring a new column to get population as numeric values in case we need to do aggregation functions
+pop$population_numeric = as.numeric(pop$population)
+summary(pop)
+pop[which.min(as.numeric(pop$population)),]
+```
+
+## Step 2: Merge the population data with the state name data
+
+D)	Read in the state name .csv file from the URL below into a dataframe named **abbr** (for "abbreviation") – make sure to use the read_csv() function from the tidyverse package: <br>
+https://intro-datascience.s3.us-east-2.amazonaws.com/statesInfo.csv
+
+
+
+```{r}
+library(tidyverse)
+abbr <- read_csv('https://intro-datascience.s3.us-east-2.amazonaws.com/statesInfo.csv')
+```
+
+E)	To successfully merge the dataframe **pop** with the **abbr** dataframe, we need to identify a **column they have in common** which will serve as the **“key”** to merge on. One column both dataframes have is the **state column**. The only problem is the slight column name discrepancy – in **pop**, the column is called **“state”** and in **abbr** – **“State.”** These names need to be reconciled for the merge() function to work. Find a way to rename **abbr’s “State”** to **match** the **state column in pop**.    
+
+
+```{r}
+# names is a function in R which operates on names of the 
+names(abbr)[names(abbr)=='State']<- 'state'
+# printing the names so that we can verify the State value changed to state
+names(abbr)
+```
+
+F)	Merge the two dataframes (using the **‘state’ column** from both dataframes), storing the resulting dataframe in **dfNew**.
+
+
+```{r}
+# MERGE command used to merge 2 tables poo and abbr. X='state' for the state column in pop and vice versa for y='state'
+dfNew <- merge(pop,abbr,all.x=TRUE,by.x="state",by.y="state")
+```
+
+G)	Review the structure of **dfNew** and explain the columns (aka attributes) in that dataframe.
+
+
+```{r}
+summary(dfNew)
+# city column contains all the city names
+# abbreviation column is the short abbreviation of all states names like for NewYork it is NY. Every abbreviation is of 2 characters
+# Growth column contains the growth percentage from year 2000 to 2013. 
+# latitude and longitude represents coordinates from the cities
+# population represents population of the different cities
+# Rank signifies city's rank with respect to other. The criteria through which they are ranked is still unclear, state contains the state value in which those city are present
+```
+
+## Step 3: Visualize the data
+
+H)	Plot points (on top of a map of the US) for **each city**. Have the **color** represent the **population**.
+
+
+```{r}
+#dfNew
+dfNew$state <- tolower(dfNew$state)
+map <- ggplot(dfNew)
+#x=longitude,y=latitude. and plotting a point graph, geom_plot()
+map <- map + aes(longitude, latitude,rank) + geom_point(fill = dfNew$population_numeric, color = "blue") 
+map <- map + expand_limits(x=dfNew$longitude, y=dfNew$latitude)
+# Adding title by ggtitle
+map <- map + coord_map() + ggtitle("USA Map")
+map
+```
+```{r}
+dfNew$pop <- as.numeric(dfNew$population)
+us <- map_data("state")
+
+map_1 <- ggplot(dfNew,aes(map_id = state))
+
+map_1<- map_1 + aes(x = longitude,y=latitude) + geom_map(map = us, color = "black", aes(fill = pop))
+
+map_1 <- map_1 + expand_limits(x = us$long,y=us$lat)
+
+map_1 <- map_1 + coord_map(projection = "mercator") + ggtitle("USAmap")
+
+map_1
+
+map_2 <- map_1 + xlim(-130,-62) + ylim(20,50)
+
+map_2
+
+map_3 <- map_2 + geom_point(aes(x=dfNew$longitude,y =dfNew$latitude))
+
+map_3
+```
+I)	Add a block comment that criticizes the resulting map. It’s not very good.
+
+
+```{r}
+# the map supposedly should show the outline of USA but this is far from the outline of the USA. One more reason is the population fill that is showing is not showing according to the state but it is showing according to the cities. Since Within the states there are many cities and all the cities have different population. Thus the fill value of population shows uneven population in one state area
+```
+
+## Step 4: Group by State
+
+
+J)	Use group_by and summarise to make a dataframe of state-by-state population. Store the result in **dfSimple**.
+
+
+```{r}
+#?group_by()
+dfSimple <-  dfNew %>% group_by(state) %>% summarise(totalpop=sum(population_numeric),latitude,longitude)
+#dfSimple
+```
+
+K)	Name the most and least populous states in **dfSimple** and show the code you used to determine them.
+
+
+```{r}
+# getting all the states present in the dfSimple Table 
+unique_state<-unique(dfSimple$state)
+sum_of_state<-c()
+for (val in unique_state){
+  sum_of_state <- c (sum_of_state, (sum(dfSimple$totalpop[dfSimple$state==val])))
+}
+#by this we can see that all entries start from the first index
+sum_of_state[1]
+# the index where the sum is minimum is the same index where we find our state who's population is minimum
+unique_state[which.min(sum_of_state)]
+#which.max(sum(dfSimple$population_numeric[dfSimple$state==unique_state]))
+```
+```{r}
+# just a question from my side, is there any way to do it without using loops ?
+dfSimple[which.max(dfSimple$totalpop),]
+
+dfSimple[which.min(dfSimple$totalpop),]
+```
+
+## Step 5: Create a map of the U.S.,  with the color of the state representing the state population
+
+L) Make sure to expand the limits correctly and that you have used **coord_map** appropriately.
+
+
+
+```{r}
+map_new <- ggplot(dfSimple)
+# Here I am not saving the value into map_new but just displaying the plot directly. totalPop is declared above in question J. Drawing polygon plot. Coord_map mercator specifies a given ratio to be followed between logitudes and latitudes.
+map_new + aes(longitude,latitude,group=state,fill=totalpop) + geom_polygon()+
+  expand_limits(x=dfSimple$longitude, y=dfSimple$latitude) + coord_map(projection = "mercator")
+```
+```{r}
+new_map <- ggplot(dfSimple,aes(map_id = state))
+
+new_map <- new_map + geom_map(map= us, color = "black", aes(fill = totalpop)) 
+
+new_map <- new_map + expand_limits(x = us$long,y=us$lat)
+
+new_map_ <- new_map + expand_limits(x = dfNew$longitude, y= dfNew$latitude)
+
+new_map <- new_map + coord_map(projection = "mercator") + ggtitle("usamap")
+
+new_map
+```

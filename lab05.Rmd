@@ -1,0 +1,127 @@
+## Intro to Data Science - Lab 1
+
+# IST687 Section M002
+
+# Professor Anderson
+
+# Enter your name here: Pranav Sharma
+
+#Select one of the below and add needed information
+
+# 1. I did this homework by myself, with help from the book and the professor.
+```{r}
+#install.packages("RCurl")
+#install.packages("jsonlite")
+library(RCurl)
+library(jsonlite)
+station_link <- 'https://gbfs.citibikenyc.com/gbfs/en/station_status.json'
+apiOutput <- getURL(station_link)
+apiData <- fromJSON(apiOutput)
+stationStatus <- apiData$data$stations
+cols <- c('num_bikes_disabled','num_docks_disabled', 'station_id',
+ 'num_ebikes_available', 'num_bikes_available', 'num_docks_available')
+stationStatus = stationStatus[,cols]
+```
+1. Explain	what you	see	if	you	type	in	the	station_link	URL	into	a	browser	(in	a	
+comment,	write	what	you	see)
+```{r}
+# We see a  big JSON objects data file. We see data to the first element under which stations come. Because there is no indentation , we can make out very less out of the 
+```
+2. Provide	a	comment	explaining	each	line	of	code.	
+```{r}
+# storing the URL in variable station link
+station_link <- 'https://gbfs.citibikenyc.com/gbfs/en/station_status.json'
+# storing the URL in variable apiOutput
+apiOutput <- getURL(station_link)
+# storing the JSON data in apiOutput and converting it from the JSON file to R objects
+apiData <- fromJSON(apiOutput)
+#?fromJSON()
+#View(apiData)
+#  storing in the station status variable the stations value which is present in apiData-->data-->stations
+stationStatus <- apiData$data$stations
+# Storing the column names in cols
+cols <- c('num_bikes_disabled','num_docks_disabled', 'station_id',
+ 'num_ebikes_available', 'num_bikes_available', 'num_docks_available')
+#View(stationStatus) 
+# the column names we put earlier in cols are being traversed and we get a DF with only columns in the stations that we want.
+stationStatus = stationStatus[,cols]
+
+```
+3. Use	str(	)	to	find	out	the	structure	of	apiOutput	and	apiData.	Report	(via	a	
+comment)	what	you	found	and	explain the	difference	between	these	two	objects.	
+```{r}
+# commenting out for knitting purposes
+#str(apiOutput)
+#str(apiData)
+View(apiOutput)
+
+# str of the api-output is the structure of the JSON format data. It is unrefined because it is in JSON
+# STR of apidata gives us the structure of the R object which has been convered from JSON. WE get a detailed understanding  apioutput is of type character[1] and apidata is coverted into a R Object which has a tree like structure
+```
+4. The	apiOutput	object	can	also	be	examined	with	a	custom	function	from	the	
+jsonlite	package	called	prettify(	).	Run	this	command	and	explain what	you	
+found (in	a	comment).
+```{r}
+# Answer:- prettify(apiOutput)
+#?prettify()
+# it displays the structure in form of a JSON string. It is able to parse a JSON string in a better manner and in this to see the structure atleast, we don't need to convert the JSON into an R object and then use the View() command
+```
+5. Explain	stationStatus	(what	type	of	object,	what	information	is	available)
+```{r}
+# station status has 6 columns including 'num_bikes_disabled','num_docks_disabled', 'station_id','num_ebikes_available', 'num_bikes_available', 'num_docks_available'.  It is a dataframe object . Information available here is taken from apidata itself
+summary(stationStatus)
+```
+
+This	is	the	end	of	the	first	breakout	session.	Please	send	a	chat	message	to	your	
+instructor	when	you	are	finished.
+______________________________________________________________________________________________
+Second	Breakout	Session	Starts	Here
+6. Generate	a	histogram	of	the	number	of	docks	available
+```{r}
+
+hist(stationStatus$num_docks_available)
+```
+7. Generate	a	histogram	of	the	number	of	bikes	available
+```{r}
+hist(stationStatus$num_bikes_available)
+print(' just curious, if we are asking hist of number of bikes available, why are we counting instances where there were 0 bikes, seems like unnecessary. 
+      what are your opinions? I wrote this because thats how everyone did !' )
+```
+8. How	many	stations	have	at	least	one	ebike?
+```{r}
+sum(stationStatus$num_ebikes_available>= 1)
+```
+9. Explore	stations	with	at	least	one	ebike	by	create	a	new	dataframe,	that	only	has	
+stations	with	at	least	one	eBike.	
+```{r}
+eBikesDF<- stationStatus[stationStatus$num_ebikes_available>=1, ]
+min(eBikesDF$num_ebikes_available)
+```
+10. Calculate	the	mean	of	‘num_docks_available’	for	this	new	dataframe.
+```{r}
+mean(eBikesDF$num_docks_available)
+```
+
+11. Calculate	the	mean	of	‘num_docks_available’	for	for	the	full	‘stationStatus’	
+dataframe.	In	a	comment,	explain	how	different	are	the	two	means?
+```{r}
+mean(stationStatus$num_docks_available)
+```
+12. Create	a	new	attribute,	called	‘stationSize’,	which	is	the	total	number	of	“slots”	
+available	for	a	bike	(that	might,	or	might	not,	have	a	bike	in	it	now).	Run	a	
+histogram	on	this	variable	and	review	the	distribution.
+Intro	to	DS – Copyright	2021 by	J. Stanton &	J.	Saltz – Please	do	not	post	online.	
+Week	5	– Obtaining	and	Using	Data	from	a	JSON	API
+```{r}
+stationStatus$stationSize <- stationStatus$num_bikes_available +stationStatus$num_bikes_disabled + stationStatus$num_ebikes_available + stationStatus$num_docks_available + stationStatus$num_docks_disabled
+```
+13. Use the plot(	)	command	to produce an	X-Y	scatter	plot	with	the	number	of	
+occupied	docks	on	the	X-axis	and	the	number	of	available	bikes on	the	Y-axis.	
+Explain the	results plot
+```{r}
+# plot(X axis, Y axis )
+# X axis --> Occupied slots=  stationStatus$stationSize- stationStatus$num_docks_available - stationStatus$num_docks_disabled
+#Y axis --> stationStatus$num_bikes_available
+plot(stationStatus$stationSize- stationStatus$num_docks_available - stationStatus$num_docks_disabled,stationStatus$num_bikes_available)
+
+```

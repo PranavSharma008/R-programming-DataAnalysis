@@ -1,0 +1,127 @@
+
+# Intro to Data Science Lab09
+##### Copyright Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here: Pranav Sharma
+```
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this lab by myself, with help from the book and the professor.
+#install.packages("kernlab")
+library(kernlab)
+#install.packages("caret")
+library(caret)
+```
+```{r}
+data("GermanCredit")
+subCredit <- GermanCredit[,1:10]
+str(subCredit)
+```
+
+1. Examine	the	data	structure	that	str()	reveals.	Also	use	the	help()	function	to
+learn	more	about	the	GermanCredit	data	set.	Summarize	what	you	see	in	a
+comment.
+```{r}
+str(GermanCredit)
+#help("GermanCredit")
+#View(GermanCredit)
+#summary(GermanCredit)
+
+# the data frame has a total of 1000 observations with 62 observations. 62 observations means 62 columns when converted into a dataframe. We see almost all the observations of the datatype either int or num. All the 62 observations are various attributes of data from Dr. Hans Hoffman. 
+```
+2. Use	the	createDataPartition() function	to	generate	a	list	of	cases	to
+include	in	the	training	data.	This	function is	conveniently	provided	by	caret	and
+allows	one	to	directly	control	the	number	of	training	cases.	It	also	ensures	that
+the	training	cases	are	balanced	with	respect	to	the	outcome	variable.	Try	this:
+trainList <-
+createDataPartition(y=subCredit$Class,p=.40,list=FALSE)
+```{r}
+set.seed(10)
+trainList <- createDataPartition(y=subCredit$Class,p = 0.40,list = FALSE)
+```
+3. Examine	the	contents	of	trainList	to	make	sure	that	it	is	a	list	of	case	numbers.
+With	p=0.40,	it	should	have	400	case	numbers	in	it.
+```{r}
+View(trainList)
+nrow(trainList)
+```
+4. What	is	trainList?	What	do	the	elements	in	trainList	represent?	Which	attribute
+is	balanced	in	the	trainList	dataset?
+```{r}
+# Train list represents a subset of the data which is being selected from the German Credit dataset. This data will be used to train a machine learning model. That model would be used to predict the values of the test data. We have taken 40 percent of the data. We are take subCredit$Class from the GermanCredit Dataset
+```
+5. Use	trainList	and	the	square	brackets	notation	to	create	a	training	data	set	called
+“trainSet”	from	the	subCredit	data	frame.	Look	at	the	structure	of	trainSet	to
+make	sure	it	has	all	of	the	same	variables	as	subCredit.	The	trainSet	structure
+should	be	a	data	frame	with	400	rows	and	10	columns.
+```{r}
+trainSet <- subCredit[trainList,]
+#View(trainSet)
+nrow(trainSet)
+ncol(trainSet)
+```
+6. Use	trainList	and	the	square	brackets	notation	to	create	a	testing	data	set	called
+“testSet”	from	the	subCredit	data	frame.	The	testSet	structure	should	be	a	data
+frame	with	600	rows	and	10	columns	and	should	be	a	completely	different	set	of
+cases	than	trainSet.
+```{r}
+testSet<- subCredit[-trainList,]
+#View(testSet)
+nrow(testSet)
+ncol(testSet)
+```
+
+Intro	to	DS	–	Copyright	2021	by	J.	Stanton &	J.	Saltz	–	Please	do	not	post	
+online.	Week 9	–	Supervised	Data	Mining	
+
+
+7. Create	and	interpret	boxplots	of	all the	predictor	variables in	relation	to	the
+outcome	variable	(Class).
+```{r}
+#
+boxplot(Duration ~ Class, data=trainSet)
+
+boxplot(Amount ~ Class, data=trainSet)
+```
+8. Train	a	support	vector	machine	with	the	ksvm()	function	from	the	kernlab
+package.	Make	sure	that	you	have	installed	and	libraried	the kernlab package.
+Have	the	cost be	5,	and	have	ksvm	do	3	cross	validations	(hint:	try	prob.model	=	
+TRUE)
+```{r}
+help("ksvm")
+svmModel<- ksvm(Class~.,data=trainSet, C=5, cross=3, prob.model=TRUE)
+```
+9. Examine	the	ksvm output	object.	In	particular,	look	at	the	cross-validation	error
+for	an	initial	indication	of	model	quality.	Add	a	comment	that	gives	your	opinion
+on	whether	this	is	a	good	model.
+```{r}
+svmModel
+# Cross validation error is 32 percent.It means accuracy is around 68-69 percent.  It can be considered a good model depending on the business requirements.
+```
+10. Predict	the	training	cases	using	the	predict	command
+```{r}
+predOut <-predict(svmModel,newdata=testSet,type="response")
+```
+11. Examine	the	predicted	out	object	with	str(	).	Then,	calculate	a	confusion	matrix
+using	the	table	function.
+```{r}
+table(predOut,testSet$Class)
+# on a rough estimate it looks like 30 percent error rate
+```
+12. Interpret	the	confusion	matrix	and	in	particular	calculate	the	overall	accuracy	of
+the	model.	The	diag(	)	command	can	be	applied	to	the	results	of	the	table
+command	you	ran	in	the	previous	step.	You	can	also	use	sum(	)	to	get	the	total	of
+all	four	cells.
+```{r}
+sum(diag(table(predOut,testSet$Class)))/sum(table(predOut,testSet$Class))
+```
+13. Check	you	calculation	with	confusionMatrix()	function	in	the	caret	package.
+```{r}
+confusionMatrix(predOut,testSet$Class)
+# You can see the accuracy calculated here is the same as last question.
+```
